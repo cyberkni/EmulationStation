@@ -17,7 +17,7 @@ private:
 
 	static InputManager* mInstance;
 
-	static const int DEADZONE = 23000;
+	static const int DEADZONE = 127;
 
 	void loadDefaultKBConfig();
 

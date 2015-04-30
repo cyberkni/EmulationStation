@@ -92,6 +92,9 @@ public:
 	inline int getDeviceId() const { return mDeviceId; };
 	inline const std::string& getDeviceName() { return mDeviceName; }
 	inline const std::string& getDeviceGUIDString() { return mDeviceGUID; }
+  int getAxisPositiveThreshold(int axis_id);
+  int getAxisNegativeThreshold(int axis_id);
+  bool isAxisConfigured(int axis_id);
 
 	//Returns true if Input is mapped to this name, false otherwise.
 	bool isMappedTo(const std::string& name, Input input);
@@ -113,6 +116,8 @@ private:
 	const int mDeviceId;
 	const std::string mDeviceName;
 	const std::string mDeviceGUID;
+  std::map<int, int> mAxisNegativeThreshold;
+  std::map<int, int> mAxisPositiveThreshold;
 };
 
 #endif

@@ -75,6 +75,18 @@ void InputConfig::unmapInput(const std::string& name)
 		mNameMap.erase(it);
 }
 
+int InputConfig::getAxisPositiveThreshold(int axis_id) {
+  return mAxisPositiveThreshold[axis_id];
+}
+
+int InputConfig::getAxisNegativeThreshold(int axis_id) {
+  return mAxisNegativeThreshold[axis_id];
+}
+
+bool InputConfig::isAxisConfigured(int axis_id) {
+  return (mAxisPositiveThreshold.count(axis_id) > 0 && mAxisNegativeThreshold.count(axis_id) > 0 );
+}
+
 bool InputConfig::getInputByName(const std::string& name, Input* result)
 {
 	auto it = mNameMap.find(toLower(name));
@@ -170,6 +182,15 @@ void InputConfig::loadFromXML(pugi::xml_node node)
 
 		mNameMap[toLower(name)] = Input(mDeviceId, typeEnum, id, value, true);
 	}
+  // load axis configs
+  for(pugi::xml_node axis = node.child("axis_config"); axis; axis = axis.next_sibling("axis_config"))
+  {
+    int axis_id = axis.attribute("id").as_int();
+    int negative_threshold = axis.attribute("negative_threshold").as_int();
+    int positive_threshold = axis.attribute("positive_threshold").as_int();
+    mAxisNegativeThreshold[axis_id] = negative_threshold;
+    mAxisPositiveThreshold[axis_id] = positive_threshold;
+  }
 }
 
 void InputConfig::writeToXML(pugi::xml_node parent)
@@ -199,4 +220,15 @@ void InputConfig::writeToXML(pugi::xml_node parent)
 		input.append_attribute("id").set_value(iterator->second.id);
 		input.append_attribute("value").set_value(iterator->second.value);
 	}
+  for(std::map<int, int>::iterator axis_it=mAxisPositiveThreshold.begin(); axis_it!=mAxisPositiveThreshold.end(); ++axis_it)
+  {
+    int axis_id = axis_it->first;
+    // Skip half configured axes
+    if(mAxisNegativeThreshold.count(axis_id) < 1)
+      continue;
+    pugi::xml_node axis = cfg.append_child("axis_config");
+    axis.append_attribute("id").set_value(axis_id);
+    axis.append_attribute("negative_threshold").set_value(mAxisNegativeThreshold[axis_id]);
+    axis.append_attribute("positive_threshold").set_value(mAxisPositiveThreshold[axis_id]);
+  }
 }
